@@ -13,8 +13,8 @@ const axios = require('axios');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('edit-profil')
-        .setDescription('Renvoie l\'historique du joueur')
+        .setName('shortcut')
+        .setDescription('Raccourcie pour afficher la liste des joueurs dans la base de données')
         .addStringOption(option => option
             .setName("pseudo")
             .setDescription("Le pseudo LoL que vous voulez voir")

@@ -16,9 +16,17 @@ module.exports = {
         .setName('shortcut-management')
         .setDescription('Permet d effectuer des opérations sur la base de données (modifier la lsite des joueurs enregistré)')
         .addStringOption(option => option
+            .setName("operation")
+            .setDescription("L'opération à éffectuer sur la liste")
+            .addChoice('Add a player', 'ADD')
+            .addChoice('Delete a player','DELETE')
+            .addChoice('Show list','SHOW')
+            .setRequired(true)) //Pas obligé OU OBLIG2 ^^
+        .addStringOption(option => 
+            option
             .setName("pseudo")
-            .setDescription("Le pseudo LoL que vous voulez voir")
-            .setRequired(true)), //Pas obligé OU OBLIG2 ^^
+            .setDescription("Le pseudo sur lequel vous voulez effectuer l'opération")
+            .setRequired(false)), //TODO Voir si il est possible de ne pas mettre le pseudo si on show juste.
         /**
          * 
          * 
@@ -26,6 +34,8 @@ module.exports = {
          */
 
         //TODO Faire les différentes options de commandes supp add et show, comme ça cool
+
+        
     async execute(client,interaction){
 
         let profile = "";

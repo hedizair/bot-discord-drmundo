@@ -3,10 +3,13 @@ const { CommandInteraction, DiscordAPIError } = require('discord.js');
 const Discord = require('discord.js');
 const { clientId, guildId, token, ritoApiKey } = require('../../config.json');
 
-
+const {Firebase} = require('../class/Firebase')
 const {Game} = require('../class/Game');
+//const { dbFirebase } = require('../index');
 
 const axios = require('axios');
+
+
 
 //TODO FAIRE UN TITRE AVEC CE LIEN AU LANCEMENT DU BOT https://patorjk.com/software/taag/#p=display&f=Big%20Money-ne&t=Dr-Mundoo!
 
@@ -38,35 +41,47 @@ module.exports = {
         
     async execute(client,interaction){
 
-        let profile = "";
+        //const dbFirebase = new Firebase();
+        const operation = interaction.options.getString("operation");
+        const guildId = interaction.guild.id;
 
-        try{
-            let pseudo = interaction.options.getString("pseudo");
-            profile = await axios.get('https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/'+pseudo+"?api_key="+ritoApiKey);
-        }catch(error){
-            console.log('utilisateur introuvable');
-            await interaction.reply(interaction.options.getString("pseudo"));
-            const message = await interaction.fetchReply();
-            return interaction.editReply('MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' >:-( ');
-          
+        //dbFirebase.initDocument(guildId)
+
+        console.log(guildId);
+        switch(operation){
+            case "ADD":
+                const isAdded =  await addPlayerToDb(interaction);
+                if(!isAdded) {
+                    console.log('utilisateur introuvable');
+                    await interaction.reply(interaction.options.getString("pseudo"));
+                    const message = await interaction.fetchReply();
+                    return interaction.editReply('MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' >:-( ');
+                }
+                    
+                break;
+            case "DELETE":
+                
+                deletePlayerFromDb();
+                break;
+            case "SHOW":
+                showPlayersList();
+                
+                break; 
+            
+            
         }
-       
+
 
         await interaction.deferReply();
-        const opggUrl = 'https://euw.op.gg/summoners/euw/'+ (profile.data.name.replace(/ /g,"")).toLowerCase();
-
         
 
-  
-
         const embed = new Discord.MessageEmbed()
-        .setURL(opggUrl)
         .setColor('#1BBC00')
-        .setTitle(profile.data.name)
-        .setAuthor({name: profile.data.name, iconURL:'http://ddragon.leagueoflegends.com/cdn/12.7.1/img/profileicon/'+profile.data.profileIconId+'.png'})
-        .setDescription('```Vous trouverez ici l\'historique du joueur '+profile.data.name+'```')
+        .setTitle('Not developed...')
+        .setAuthor({name: 'Dr-Mundo'})
+        .setDescription('```Nothing```')
         .addFields( 
-            {name: ' ➧ Niveau dinvocateur :hourglass: ', value: 'test', inline: true}, //Inline = sur la même ligne que les autres champs ou pas ?
+            {name: ' ➧ Nothing to show ', value: 'nothing', inline: true}, //Inline = sur la même ligne que les autres champs ou pas ?
         
         );
 
@@ -80,5 +95,33 @@ module.exports = {
         
     }
 
+  
+
+}
+
+async function addPlayerToDb(interaction){
+    console.log("addPlayer");
+    try{
+        let pseudo = interaction.options.getString("pseudo");
+        profile = await axios.get('https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/'+pseudo+"?api_key="+ritoApiKey);
+    }catch(error){
+        
+        return false;
+    }
+    return true;
+
+    
+}
+
+function deletePlayerFromDb(playerName){
+    console.log("deletePlayer")
+
+    return true;
+}
+
+function showPlayersList(){
+    console.log("showPlayers")
+
+    return true;
 }
 

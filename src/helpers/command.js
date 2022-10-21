@@ -12,7 +12,7 @@ const handleCommand = async (client, interaction) => {
     if(!command) return;
 
     try{
-        await command.execute(client,interaction); //méthode exectue le fichier profil.js par exemple
+        await command.execute(client,interaction); //On execute la fonction .execute() se trouvant dans chaque fichier de commande
     }catch(error){
         console.error(error);
         await interaction.reply({content: "Une erreur s'est produite durant l'éxecution de cette commande !", ephemeral:true});

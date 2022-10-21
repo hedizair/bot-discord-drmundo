@@ -33,47 +33,70 @@ class Firebase {
 
       this.auth = getAuth();
       this.db = getFirestore();
-      this.addDocToPlayers(); 
-      this.getPlayersData();
-
-      
-      
+      this.isExistPlayerDoc();
+      //this.addPlayerToList("kekGuildId","playerInfinite2"); 
+      //this.getPlayerLists("myOtherGuildId");
+      //this.initDocument("newColl");
       
     }
 
-    async getPlayersData() {
+    async getPlayerLists(guildId) {
       
-
-      const c = collection(this.db, 'players');
-      const docs = await getDocs(c);
-      docs.forEach((document) => {
-          console.log(document.id, ' => ', document.data(), '\n');
+      const playersColl = collection(this.db, 'players');
+      const playersDocs = await getDocs(playersColl);
+      
+      playersDocs.forEach((document) => {
+          playerArray.push({"documentId":document.id, "data":document.data()});
       });
+      console.log(playerArray);
       
     }
 
-    addDocToPlayers(){
+    async addPlayerToList(currentGuildId, playerName){
 
-      //TODO CA FONCTIONNE , VOIR COMMENT RE AFFICHER LES DONNES MTNNN !!!
+      const document = doc(this.db, 'players/testdoc'); //TODO remplacer ici par ('players/{{guildId}}') et bien sur mettre le guildId en nom de document sur la base
+      const tempTab = [playerName]; 
 
-      
-      const document = doc(this.db, 'players/testdoc');
-      let myplayer = {
-        guildId: 'idTestFromCode',
-        name: 'nameFromCode',
-
-      };
-      setDoc(document, myplayer, { merge: true })
-          .then(() => {
-              console.log("good")
-          })
-          .catch(() => {
-            console.log("not good")
-          });
-
+      updateDoc(document, 'listPlayers', arrayUnion(...tempTab))
+      .then(() => {
+        console.log("player successfully added")
+      })
+      .catch(() => {
+        console.log("error")
+      });
      
     }
 
+    async initDocument(currentGuildId){
+      //TODO Fonctionne, manque plus qu'a renommer certains truc (je crois ?)
+      const document = doc(this.db, 'players/'+currentGuildId);
+      const object = {
+        listPlayers : []
+      }
+
+      setDoc(document, object, { merge: true })
+        .then(() => {
+          console.log("initialisation Ok")
+        })
+        .catch(() => {
+          console.log("initialisation failed")
+        });
+    }
+
+    async isExistPlayerDoc(guildId){
+      const document = doc(this.db, 'players/fkljsdlfsdk'); 
+      //TODO Voir comment vérifier si un document existe (par serveur) et vérifer à chaque fois que la commande se lance
+
+      /*const tempTab = [playerName]; 
+
+      updateDoc(document, 'listPlayers', arrayUnion(...tempTab))
+      .then(() => {
+        console.log("player successfully added")
+      })
+      .catch(() => {
+        console.log("error")
+      });*/
+    }
 }
 
 exports.Firebase = Firebase;

@@ -5,6 +5,7 @@ const { Firebase } = require('./class/Firebase.js');
 
 
 
+
 const dbFirebase = new Firebase();
 
 //TODO Pour re créer une commande, toujours re éxecuter le script deploy-commands.js
@@ -38,3 +39,5 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.login(token);
+
+

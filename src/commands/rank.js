@@ -78,6 +78,8 @@ module.exports = {
             await interaction.reply(interaction.options.getString("pseudo"));
             return interaction.editReply('MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' >:-( ');
         }
+
+        await interaction.deferReply();
        
         const queueSelected = interaction.options.getString("queue");
         const idAccount = profile.data.id + '';
@@ -138,7 +140,7 @@ module.exports = {
 
         //TODO Ajouter le "await interaction.deferReply();" et supprimer ligne 141 (car équivalent et peut pas faire 2 fois).
         await interaction.channel.send({embeds:[embed], files: [TAB_RANK_EMBLEMS[currentTier]]}); 
-        await interaction.reply("Trouvé !");
+        //  await interaction.reply("Trouvé !");
         const message = await interaction.fetchReply();
         return await interaction.editReply(`Le message a mis ${message.createdTimestamp - interaction.createdTimestamp} ms pour me parvenir et revenir.`);
         

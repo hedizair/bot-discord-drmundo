@@ -41,16 +41,17 @@ module.exports = {
         
     async execute(client,interaction){
 
-        //const dbFirebase = new Firebase();
         const operation = interaction.options.getString("operation");
         const guildId = interaction.guild.id;
+        const dbFirebase = new Firebase();
+        
+        //TODO Verifier que ça fonctionne  (ça fonctionne pas la)
+        //dbFirebase.initDocument(guildId); //ne s'initialise seulement si le document n'existe pas
+        
 
-        //dbFirebase.initDocument(guildId)
-
-        console.log(guildId);
         switch(operation){
             case "ADD":
-                const isAdded =  await addPlayerToDb(interaction);
+                const isAdded =  await addPlayerToDb(interaction,dbFirebase);
                 if(!isAdded) {
                     console.log('utilisateur introuvable');
                     await interaction.reply(interaction.options.getString("pseudo"));
@@ -99,23 +100,27 @@ module.exports = {
 
 }
 
-async function addPlayerToDb(interaction){
+async function addPlayerToDb(interaction,db){
+    //On vérifie d'abbord si le pseudo existe
     console.log("addPlayer");
+    let pseudo = ''
     try{
-        let pseudo = interaction.options.getString("pseudo");
+        pseudo = interaction.options.getString("pseudo");
         profile = await axios.get('https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/'+pseudo+"?api_key="+ritoApiKey);
     }catch(error){
         
         return false;
     }
+    db.addPlayerToList(interaction.guild.id,pseudo);
     return true;
 
     
 }
 
+
+
 function deletePlayerFromDb(playerName){
     console.log("deletePlayer")
-
     return true;
 }
 
@@ -124,4 +129,6 @@ function showPlayersList(){
 
     return true;
 }
+
+
 

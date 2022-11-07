@@ -33,6 +33,8 @@ class Firebase {
 
       this.auth = getAuth();
       this.db = getFirestore();
+
+      //this.deletePlayer('undeux','test')
       // this.initDocument('oneGuildId');
       //this.isExistPlayerDoc("testdoc");
       //TODO plus qu'a implementer tous ça ( et virer la fonction test )
@@ -42,18 +44,18 @@ class Firebase {
 
     async getPlayersList(guildId) {
 
-      const document = await getDoc(collection(this.db, 'players/'+guildId));
-			if (caches.exists()) return document.data().listPlayers;
+      const document = await getDoc(doc(this.db, 'players/'+guildId));
+			return document.data().listPlayers;
       
     }
 
-    async addPlayerToList(currentGuildId, playerName){
-      await this.initDocument(currentGuildId);
-      
-      const document = doc(this.db, 'players/'+currentGuildId); //TODO remplacer ici par ('players/{{guildId}}') et bien sur mettre le guildId en nom de document sur la base
+    async addPlayerToList(guildId, playerName){
+      await this.initDocument(guildId);
+
+      const document = doc(this.db, 'players/'+guildId); //TODO remplacer ici par ('players/{{guildId}}') et bien sur mettre le guildId en nom de document sur la base
       const tempTab = [playerName]; 
 
-      updateDoc(document, 'listPlayers', arrayUnion(...tempTab))
+      await updateDoc(document, 'listPlayers', arrayUnion(...tempTab))
       .then(() => {
         console.log("player successfully added")
       })
@@ -63,8 +65,35 @@ class Firebase {
      
     }
 
+    async deletePlayer(guildId, playerName){
+      
+      if(!await this.isExistPlayerDoc(guildId)){
+        console.log('document did not exist')
+        return false;
+      }
+
+      if(!await this.isExistPlayer(guildId,playerName)){
+        console.log('player did not exist');
+        return false;
+      }
+
+      const document = doc(this.db, 'players/'+guildId); 
+      
+      await updateDoc(document, 'listPlayers', arrayRemove(playerName))
+        .then(() => {
+          console.log("player successfully deleted")
+        })
+        .catch(() => {
+          console.log("error")
+        });
+				
+
+    }
+
+
+
     async initDocument(currentGuildId){
-      //console.log('Value of coll : ', await this.isExistPlayerDoc(currentGuildId))
+      
       if(!await this.isExistPlayerDoc(currentGuildId)){
         const document = doc(this.db, 'players/'+currentGuildId);
         const object = {
@@ -89,7 +118,6 @@ class Firebase {
     async isExistPlayerDoc(guildId){
 
       const document = await getDoc(doc(this.db, 'players/'+guildId));
-      console.log(document.data());
 
       if(typeof document.data() === 'undefined'){
         console.log("false")
@@ -100,6 +128,17 @@ class Firebase {
 
     }
 
+
+    
+    async isExistPlayer(guildId, playerName){
+      const list = await this.getPlayersList(guildId);
+      if(list.includes(playerName))
+        return true;
+      return false;
+      
+    }
+
+    
 
 }
 

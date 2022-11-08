@@ -34,16 +34,15 @@ class Firebase {
       this.auth = getAuth();
       this.db = getFirestore();
 
-      //this.deletePlayer('undeux','test')
-      // this.initDocument('oneGuildId');
-      //this.isExistPlayerDoc("testdoc");
-      //TODO plus qu'a implementer tous ça ( et virer la fonction test )
       
       
     }
 
     async getPlayersList(guildId) {
 
+      if(!await this.isExistPlayerDoc(guildId)){
+        console.log('Doc did not exist (class)')
+      }
       const document = await getDoc(doc(this.db, 'players/'+guildId));
 			return document.data().listPlayers;
       
@@ -65,15 +64,15 @@ class Firebase {
      
     }
 
-    async deletePlayer(guildId, playerName){
+    async deletePlayerFromList(guildId, playerName){
       
       if(!await this.isExistPlayerDoc(guildId)){
-        console.log('document did not exist')
+        console.log('document did not exist (class)')
         return false;
       }
 
       if(!await this.isExistPlayer(guildId,playerName)){
-        console.log('player did not exist');
+        console.log('player did not exist (class)');
         return false;
       }
 
@@ -87,6 +86,7 @@ class Firebase {
           console.log("error")
         });
 				
+      return true;
 
     }
 

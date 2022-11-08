@@ -62,11 +62,22 @@ module.exports = {
                 break;
             case "DELETE":
                 
-                deletePlayerFromDb();
+                const isDeleted = await deletePlayerFromDb(interaction, dbFirebase);
+                if(!isDeleted){
+                    console.log('utilisateur introuvable');
+                    await interaction.reply(interaction.options.getString("pseudo"));
+                    const message = await interaction.fetchReply();
+                    return interaction.editReply('MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' dans la liste >:-( ');
+                }
                 break;
             case "SHOW":
-                showPlayersList();
-                
+                const isShown = await showPlayersList(interaction,dbFirebase);
+                if(!isShown){
+                    console.log('utilisateur introuvable');
+                    await interaction.reply(interaction.options.getString("pseudo"));
+                    const message = await interaction.fetchReply();
+                    return interaction.editReply('MUNDO a pas trouvé la liste associé au serveur, ajouter un pseudo une fois pour la créer >:-( ');
+                }
                 break; 
             
             
@@ -92,11 +103,7 @@ module.exports = {
         const message = await interaction.fetchReply();
         return await interaction.editReply(`Le message a mis ${message.createdTimestamp - interaction.createdTimestamp} ms pour me parvenir et revenir.`);
        
-
-        
     }
-
-  
 
 }
 
@@ -119,14 +126,21 @@ async function addPlayerToDb(interaction,db){
 
 
 
-function deletePlayerFromDb(playerName){
+async function deletePlayerFromDb(interaction, db){
     console.log("deletePlayer")
-    return true;
+    if(!await db.deletePlayerFromList(interaction.guild.id,interaction.options.getString("pseudo"))){
+        return true;
+    };
+    return false;
 }
 
-function showPlayersList(){
+async function showPlayersList(interaction, db){
     console.log("showPlayers")
-
+    const playerList = await db.getPlayersList('fdsfsdf');
+    if(typeof playerList === 'undefined'){
+        return false;
+    }
+    console.log(playerList);
     return true;
 }
 

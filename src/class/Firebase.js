@@ -42,6 +42,7 @@ class Firebase {
 
       if(!await this.isExistPlayerDoc(guildId)){
         console.log('Doc did not exist (class)')
+        return false;
       }
       const document = await getDoc(doc(this.db, 'players/'+guildId));
 			return document.data().listPlayers;
@@ -120,10 +121,10 @@ class Firebase {
       const document = await getDoc(doc(this.db, 'players/'+guildId));
 
       if(typeof document.data() === 'undefined'){
-        console.log("false")
+        
         return false;
       }
-      console.log("true")
+      
       return true;
 
     }

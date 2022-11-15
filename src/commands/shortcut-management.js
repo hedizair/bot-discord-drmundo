@@ -15,6 +15,8 @@ const displayedEmbed = new Discord.MessageEmbed()
 
 
 
+
+
 //TODO FAIRE UN TITRE AVEC CE LIEN AU LANCEMENT DU BOT https://patorjk.com/software/taag/#p=display&f=Big%20Money-ne&t=Dr-Mundoo!
 
 
@@ -40,71 +42,47 @@ module.exports = {
          * @param {CommandInteraction} interaction 
          */
 
-        //TODO Faire les différentes options de commandes supp add et show, comme ça cool
-
+        //TODO Refaire l'affichage un peu, que ce soit plus jolie.
+        //TODO Voir pour le parametre "pseudo" de la commande, et le mettre en optionelle.
+        //TODO Verifier quand meme si il est vide pour les commandes add et supp, annulé la commande et envoyer un message d'explication.
+        
         
     async execute(client,interaction){
 
         const operation = interaction.options.getString("operation");
         const guildId = interaction.guild.id;
         const dbFirebase = new Firebase();
+        const errorMessageAdd = 'MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' >:-( ';
+        const errorMessageDelete = 'MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' dans la liste >:-( ';
+        const errorMessageShow = 'MUNDO a pas trouvé la liste associé au serveur, ajouter un pseudo une fois pour la créer >:-( ';
         
-        //TODO Verifier que ça fonctionne  (ça fonctionne pas la)
+   
         //dbFirebase.initDocument(guildId); //ne s'initialise seulement si le document n'existe pas
         await interaction.deferReply();
         
         switch(operation){
             case "ADD":
                 const isAdded =  await addPlayerToDb(interaction,dbFirebase);
-                if(!isAdded) {
-                    console.log('utilisateur introuvable');
-                    await interaction.reply(interaction.options.getString("pseudo"));
-                    const message = await interaction.fetchReply();
-                    return await interaction.editReply('MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' >:-( ');
-                }
-                    
+                if(!isAdded)
+                    return await interaction.editReply(errorMessageAdd);
                 break;
+
             case "DELETE":
-                
                 const isDeleted = await deletePlayerFromDb(interaction, dbFirebase);
-                //TODO Comprendre pourquoi l'appelle de cette fonction crash
-                if(!isDeleted){
-                    console.log('utilisateur introuvable');
-                    await interaction.reply(interaction.options.getString("pseudo"));
-                    const message = await interaction.fetchReply();
-                    return await interaction.editReply('MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' dans la liste >:-( ');
-                }
+                if(!isDeleted)
+                    return await interaction.editReply(errorMessageDelete);
                 break;
+
             case "SHOW":
-                const isShown = await showPlayersList(interaction,dbFirebase);
-                console.log(isShown)
-                if(!isShown){
-                    console.log('utilisateur introuvable');
-                    const message = await interaction.fetchReply();
-                    return await interaction.editReply('MUNDO a pas trouvé la liste associé au serveur, ajouter un pseudo une fois pour la créer >:-( ');
-                }
+                const isShown = await showPlayersList(interaction,dbFirebase);       
+                if(!isShown)
+                    return await interaction.editReply(errorMessageShow);
                 break; 
             
             
         }
 
 
-       
-        
-        
-    
-
-        const embed = new Discord.MessageEmbed()
-        .setColor('#1BBC00')
-        .setAuthor({name: 'Dr-Mundo'})
-        .setTitle('Not developed...')
-        .setDescription('```Nothing```')
-        .addFields( 
-            {name: ' ➧ Nothing to show ', value: 'nothing', inline: true}, //Inline = sur la même ligne que les autres champs ou pas ?
-        
-        );
-
-    
         await interaction.channel.send({embeds:[displayedEmbed]});
         const message = await interaction.fetchReply();
         return await interaction.editReply(`Le message a mis ${message.createdTimestamp - interaction.createdTimestamp} ms pour me parvenir et revenir.`);
@@ -149,16 +127,14 @@ async function showPlayersList(interaction, db){
         return false;
     }
     displayedEmbed.setTitle("Affichage de la liste de joueurs")
-                    .setFields({});
+                    .setFields({name : 'Affichage de la liste', value: '{nom_du_serveur}'});
     
     playerList.forEach((player) =>{
-        displayedEmbed.addFields({name: player, value:'-'})
+        displayedEmbed.addFields({name: player, value:'...\n'})
 
     })
    
 
     return true;
 }
-
-
 

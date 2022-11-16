@@ -30,7 +30,7 @@ module.exports = {
             .addChoice('Add a player', 'ADD')
             .addChoice('Delete a player','DELETE')
             .addChoice('Show list','SHOW')
-            .setRequired(true)) //Pas obligé OU OBLIG2 ^^
+            .setRequired(false)) //Pas obligé OU OBLIG2 ^^
         .addStringOption(option => 
             option
             .setName("pseudo")
@@ -44,7 +44,7 @@ module.exports = {
 
         //TODO Refaire l'affichage un peu, que ce soit plus jolie.
         //TODO Voir pour le parametre "pseudo" de la commande, et le mettre en optionelle.
-        //TODO Verifier quand meme si il est vide pour les commandes add et supp, annulé la commande et envoyer un message d'explication.
+        //TODO Verifier quand meme si il est vide pour les commandes add et supp, annulé la commande et envoyer un message d'explication.g
         
         
     async execute(client,interaction){
@@ -55,6 +55,7 @@ module.exports = {
         const errorMessageAdd = 'MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' >:-( ';
         const errorMessageDelete = 'MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' dans la liste >:-( ';
         const errorMessageShow = 'MUNDO a pas trouvé la liste associé au serveur, ajouter un pseudo une fois pour la créer >:-( ';
+        const errorMessageNullString = 'MUNDO ne peut pas trouver une personne sans pseudo >:-( ';
         
    
         //dbFirebase.initDocument(guildId); //ne s'initialise seulement si le document n'existe pas
@@ -62,18 +63,23 @@ module.exports = {
         
         switch(operation){
             case "ADD":
+                if(interaction.options.getString("pseudo")===null)
+                    return await interaction.editReply(errorMessageNullString);
                 const isAdded =  await addPlayerToDb(interaction,dbFirebase);
                 if(!isAdded)
                     return await interaction.editReply(errorMessageAdd);
                 break;
 
             case "DELETE":
+                if(interaction.options.getString("pseudo")===null)
+                    return await interaction.editReply(errorMessageNullString);
                 const isDeleted = await deletePlayerFromDb(interaction, dbFirebase);
                 if(!isDeleted)
                     return await interaction.editReply(errorMessageDelete);
                 break;
 
             case "SHOW":
+                console.log(interaction.options.getString("pseudo"));
                 const isShown = await showPlayersList(interaction,dbFirebase);       
                 if(!isShown)
                     return await interaction.editReply(errorMessageShow);
@@ -137,4 +143,6 @@ async function showPlayersList(interaction, db){
 
     return true;
 }
+
+
 

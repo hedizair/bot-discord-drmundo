@@ -57,7 +57,7 @@ class Firebase {
 
       await updateDoc(document, 'listPlayers', arrayUnion(...tempTab))
       .then(() => {
-        console.log("player successfully added")
+        console.log("player successfully added (class)")
       })
       .catch(() => {
         console.log("error")
@@ -81,7 +81,7 @@ class Firebase {
       
       await updateDoc(document, 'listPlayers', arrayRemove(playerName))
         .then(() => {
-          console.log("player successfully deleted")
+          console.log("player successfully deleted (class)")
         })
         .catch(() => {
           console.log("error")

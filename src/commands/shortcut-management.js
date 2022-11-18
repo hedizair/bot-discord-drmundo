@@ -5,7 +5,6 @@ const { clientId, guildId, token, ritoApiKey } = require('../../config.json');
 
 const {Firebase} = require('../class/Firebase')
 const {Game} = require('../class/Game');
-//const { dbFirebase } = require('../index');
 
 const axios = require('axios');
 const displayedEmbed = new Discord.MessageEmbed()
@@ -43,22 +42,17 @@ module.exports = {
          */
 
         //TODO Refaire l'affichage un peu, que ce soit plus jolie.
-        //TODO Voir pour le parametre "pseudo" de la commande, et le mettre en optionelle.
-        //TODO Verifier quand meme si il est vide pour les commandes add et supp, annulé la commande et envoyer un message d'explication.g
         
         
     async execute(client,interaction){
 
         const operation = interaction.options.getString("operation");
-        const guildId = interaction.guild.id;
         const dbFirebase = new Firebase();
         const errorMessageAdd = 'MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' >:-( ';
         const errorMessageDelete = 'MUNDO a pas trouvé le pseudo '+ interaction.options.getString("pseudo") +' dans la liste >:-( ';
         const errorMessageShow = 'MUNDO a pas trouvé la liste associé au serveur, ajouter un pseudo une fois pour la créer >:-( ';
         const errorMessageNullString = 'MUNDO ne peut pas trouver une personne sans pseudo >:-( ';
         
-   
-        //dbFirebase.initDocument(guildId); //ne s'initialise seulement si le document n'existe pas
         await interaction.deferReply();
         
         switch(operation){
@@ -88,7 +82,6 @@ module.exports = {
             
         }
 
-
         await interaction.channel.send({embeds:[displayedEmbed]});
         const message = await interaction.fetchReply();
         return await interaction.editReply(`Le message a mis ${message.createdTimestamp - interaction.createdTimestamp} ms pour me parvenir et revenir.`);
@@ -99,6 +92,8 @@ module.exports = {
 
 async function addPlayerToDb(interaction,db){
     console.log("addPlayer");
+    let guildId = interaction.guild.id;
+    let serverName = interaction.guild.name;
     let pseudo = ''
     try{
         pseudo = interaction.options.getString("pseudo");
@@ -107,38 +102,61 @@ async function addPlayerToDb(interaction,db){
         
         return false;
     }
-    await db.addPlayerToList(interaction.guild.id,pseudo);
+    await db.addPlayerToList(guildId,pseudo,serverName);
 
-    displayedEmbed.setTitle("Ajout d'un joueur à la liste")
-                    .setFields({name:"➧", value:"Le joueur "+ pseudo + " à bien été ajouté à la liste."});
+    displayedEmbed.setTitle("---  Ajout d'un joueur à la liste  ---")
+                    .setFields(
+                        {name : ':computer: Server : ', value: '```➧ ' + serverName + '```'},
+                        {name : ':white_check_mark: Joueur ajouté : ', value : '```' + pseudo + '```'}
+                    );
+                    
     return true;
     
 }
 
 async function deletePlayerFromDb(interaction, db){
     console.log("deletePlayer")
-    if(!await db.deletePlayerFromList(interaction.guild.id,interaction.options.getString("pseudo"))){
+    let guildId = interaction.guild.id;
+    let serverName = interaction.guild.name;
+    let pseudo = interaction.options.getString("pseudo");
+    if(!await db.deletePlayerFromList(guildId,pseudo)){
         return false;
     };
-    displayedEmbed.setTitle("Suppression d'un joueur de la liste")
-                        .setFields({name:"➧", value:"Le joueur "+ interaction.options.getString("pseudo") + " à bien été supprimé de la liste."});
+
+    displayedEmbed.setTitle("---  Suppression d'un joueur de la liste  ---")
+                    .setFields(
+                        {name : ':computer: Server : ', value: '```➧ ' + serverName + '```'},
+                        {name : ':x: Joueur supprimé : ', value : '```' + pseudo + '```'}
+                    );
+
     return true;
 }
 
 async function showPlayersList(interaction, db){
+    const guildId = interaction.guild.id;
     console.log("showPlayers")
-    const playerList = await db.getPlayersList(interaction.guild.id);
+    const playerList = await db.getPlayersList(guildId);
     
     if(!playerList){
         return false;
     }
-    displayedEmbed.setTitle("Affichage de la liste de joueurs")
-                    .setFields({name : 'Affichage de la liste', value: '{nom_du_serveur}'});
+
+    let serverName = await db.getServerName(guildId)
     
+    
+    let renderListStr = "```";
     playerList.forEach((player) =>{
-        displayedEmbed.addFields({name: player, value:'...\n'})
+        //displayedEmbed.addFields({name: player, value:'...\n'})
+        renderListStr += "➧ " + player + "\n";
 
     })
+    renderListStr += "```";
+
+    displayedEmbed.setTitle("---  Affichage de la liste de joueurs  ---")
+                    .setFields(
+                        {name : ':computer: Server : ', value: '```➧ ' + serverName + '```'},
+                        {name : ':scroll: Liste : ', value : renderListStr}
+                    );
    
 
     return true;

@@ -49,8 +49,17 @@ class Firebase {
       
     }
 
-    async addPlayerToList(guildId, playerName){
-      await this.initDocument(guildId);
+    async getServerName(guildId){
+      if(!await this.isExistPlayerDoc(guildId)){
+        console.log('Doc did not exist (class)')
+        return false;
+      }
+      const document = await getDoc(doc(this.db, 'players/'+guildId));
+			return document.data().serverName;
+    }
+
+    async addPlayerToList(guildId, playerName, serverName){
+      await this.initDocument(guildId,serverName);
 
       const document = doc(this.db, 'players/'+guildId); //TODO remplacer ici par ('players/{{guildId}}') et bien sur mettre le guildId en nom de document sur la base
       const tempTab = [playerName]; 
@@ -93,11 +102,12 @@ class Firebase {
 
 
 
-    async initDocument(currentGuildId){
+    async initDocument(currentGuildId, serverName){
       
       if(!await this.isExistPlayerDoc(currentGuildId)){
         const document = doc(this.db, 'players/'+currentGuildId);
         const object = {
+          serverName : serverName,
           listPlayers : []
         }
         setDoc(document, object, { merge: true })
